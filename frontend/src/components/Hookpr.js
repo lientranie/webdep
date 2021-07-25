@@ -1,33 +1,38 @@
 import React from 'react';
-import { Button } from './Button';
+import { MyInput } from './MyInput';
+import Search from './Search';
 
-
+const sendbackend = (state) => {
+    fetch('/api/v1/events', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: state.value
+        })
+    }).then(
+        res => res.json()
+    ).then(
+        data => console.log(data)
+    )
+}
 
 function Hookpr() {
-    const [counter, setCounter] = React.useState(0)
-    const inc =() => {setCounter(counter +1); }
-
-    const dec =() => {setCounter(counter -1); }
-
-
+    
     return (
         <div>
-           <h1>The state Hook</h1> 
-           <p>Counter: {counter} </p>
-           <button onClick={inc}>+1  </button>
-           <button onClick={dec}>-1</button>
-
+           
            <div className='input-areas'>
-            <form>
-                <input
-                className='footer-input'
-                name='search'
-                type='text'
-                placeholder='Search for event'
-                />
-            </form>
+                <MyInput onEnter={sendbackend}/>
+            </div>
+
+            <div>
+                <Search />
             </div>
         </div>
+
+
     )
 }
 
