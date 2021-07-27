@@ -18,20 +18,14 @@ const sendbackend = (state) => {
     )
 }
 
-function Hookpr() {
-    
+function Hookpr() {    
     return (
         <div>
            
            <div className='input-areas'>
                 <MyInput onEnter={sendbackend}/>
-            </div>
-
-            <div>
-                <Search />
-            </div>
+            </div>            
         </div>
-
 
     )
 }

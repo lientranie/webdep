@@ -1,106 +1,27 @@
-import React, {useState} from 'react';
-import CardItem from './CardItem';
-import Places from './Places';
+import React from 'react';
 
 
-const Category =({ items }) => {
-    const [activeIndex, setActiveIndex] = useState(null)
-
-    const onTitleClick = (index) => {
-        setActiveIndex(index);
-    }
-
-    const renderedItems = items.map( (item, index) => {
-        const active = index === activeIndex ? 'secondary' : ''
-
+const Category =({ items, clickedItem, setClickedItem }) => {
+    
+    const renderedItems = items.map( (item) => {
+        const active = item === clickedItem ? 'secondary' : ''
         return ( 
-        <React.Fragment  key={item.title}>
+        <React.Fragment  key={item}>
             <button 
-                className = {`ui ${active} button`}
-                onClick ={ () => onTitleClick(index) }
+                className = {`mini ui ${active} button`}
+                onClick ={ () => setClickedItem(item) }
             >
-                {item.title}
+                {item}
             </button>  
         </React.Fragment>        
         )
-        
     });
-
     
     return (
     <div  >
-        {renderedItems}
-        <div className='cards__container'>
-            <div className='cards__wrapper'>
-                <ul className='cards__items'>
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5  Address: dafsdasfghmj'
-                    label='Mystery'
-                    path='/events'
-                    />}
-
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                </ul>
-                <ul className='cards__items'>
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                    {<Places
-                    src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-                    text='Open hour: 8-5'
-                    label='Mystery'
-                    path='/events'
-                    />}
-                </ul>
-            </div>        
-        </div>
+        {renderedItems}        
     </div>
+    
         );
 }
 
