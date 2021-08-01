@@ -1,21 +1,54 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_cors import CORS
 import requests
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
 from werkzeug.exceptions import HTTPException
-from flask_sqlalchemy import SQLAlchemy 
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+import requests
 
 
 app = Flask(__name__)
 CORS(app)  # needed for cross-domain requests, allow everything by default
 app.debug = True
-
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///placesdb.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
+class App():         
+    def queryplaces(category):
+        now = datetime.now()
+        response = Places.find_by_category(str(category))
+        for k in range(len(response)):
+            if response[k].get('Today') is not None and response[k].get('Today').get('opens') is not None and response[k].get('Today').get('closes') is not None:
+                if now.strftime("%H:%M:%S") >= response[k].get('Today').get('opens') and now.strftime("%H:%M:%S") <= response[k].get('Today').get('closes'):
+                    response[k]['openStatus'] = 'Open Now'
+                else: 
+                    response[k]['openStatus'] = 'Closed Now'
+                response[k]['openTime'] = 'Open from '+ response[k].get('Today').get('opens') + ' to ' +response[k].get('Today').get('closes')
+
+        return response
+
+    def queryevents(category):
+        events_res = requests.get('http://open-api.myhelsinki.fi/v1/events/?tags_search='+category)
+        response = events_res.json().get('data')
+        for k in range(len(response)):
+            if response[k].get('event_dates').get('starting_day') is not None and response[k].get('event_dates').get('ending_day') is not None :
+                response[k]['event_starting_day']= datetime.strptime(response[k].get('event_dates').get('starting_day') ,"%Y-%m-%dT%H:%M:%S.%fZ").strftime("%d-%m-%Y %H:%M:%S")
+                response[k]['event_ending_day']= datetime.strptime(response[k].get('event_dates').get('ending_day') ,"%Y-%m-%dT%H:%M:%S.%fZ").strftime("%d-%m-%Y %H:%M:%S")
+            else:
+                response[k]['event_starting_day'] = 'no information'
+                response[k]['event_ending_day'] = 'no information'
+
+            if response[k].get('description').get('images') is not None and len(response[k].get('description').get('images')) !=0:
+                response[k]['image_url'] = response[k].get('description').get('images')[0].get('url')
+            else:
+                response[k]['image_url'] = ''
+
+        return response
+        
+
 class Places(db.Model):
+    __tablename__ = 'Places'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     locality = db.Column(db.String(120), unique=True, nullable=False)
@@ -27,6 +60,14 @@ class Places(db.Model):
     postal_code = db.Column(db.String(120), unique=True, nullable=False)
     extra_info = db.Column(db.String(120), unique=True, nullable=False)
     tags = db.Column(db.String(120), unique=True, nullable=False)
+    description_intro = db.Column(db.String(1200), unique=True, nullable=False)
+    description_body = db.Column(db.String(1200), unique=True, nullable=False)
+    Monday = db.Column(db.JSON(120), unique=True, nullable=False)
+    Tuesday = db.Column(db.JSON(120), unique=True, nullable=False)
+    Wednesday = db.Column(db.JSON(120), unique=True, nullable=False)
+    Thursday = db.Column(db.JSON(120), unique=True, nullable=False)
+    Saturday = db.Column(db.JSON(120), unique=True, nullable=False)
+    Sunday = db.Column(db.JSON(120), unique=True, nullable=False)
 
     def save_to_db(self) -> None:
         """ Method for saving store object to db """
@@ -34,12 +75,30 @@ class Places(db.Model):
         db.session.commit()
 
     @classmethod
-    def find_by_category(cls, category: str) -> "Places":
+    def find_by_category(cls,category: str) -> "Places":
         """ Class Method for searching of places by category"""
-        return cls.query.filter_by(category=category).all()
+        res = cls.query.filter(cls.tags.ilike('%{}%'.format(category))).all()
+        response = [{'id': row.__dict__.get('id'),
+                    'locality': row.__dict__.get('locality'),
+                    'street_address': row.__dict__.get('street_address'),
+                    'image_url': row.__dict__.get('image_url'), 
+                    'lat': row.__dict__.get('lat'), 
+                    'category': row.__dict__.get('category'), 
+                    'name': row.__dict__.get('name'), 
+                    'postal_code':row.__dict__.get('postal_code'),
+                    'extra_info':row.__dict__.get('extra_info'),
+                    'description_intro': row.__dict__.get('description_intro'),  
+                    'description_body': row.__dict__.get('description_body'),  
+                    'tags':row.__dict__.get('tags'), 
+                    'lon':row.__dict__.get('lon'),
+                    'Today': row.__dict__.get('{}'.format(datetime.now().strftime("%A"))),
+                    'openTime': '',
+                    'openStatus': 'no information'} for row in res if row]
+        return response
     
     def __repr__(self):
         return '<Places %r>' % self.name
+
 
 
 # default route
@@ -69,34 +128,23 @@ def server_allerror(e):
 
     
 # API route
-@app.route('/api/v1/events', methods=['POST'])
-def api():
-    query = request.json
-    events = requests.get('http://open-api.myhelsinki.fi/v1/events/').json().get('data')
-    for event in events:
-        if event.get('id') == query.get('id'):
-            return jsonify(event)
 
 @app.route('/api/v2/queryplaces', methods=['POST', 'GET'])
-def indexx():
+def queryplaces_callback():    
     query = request.json
     category =  query.get('category')
-    print(category)    
-
-    res = Places.find_by_category(str(category))
-    print(res)
-    response = [{'id': row.__dict__.get('id'),
-                'locality': row.__dict__.get('locality'),
-                'street_address': row.__dict__.get('street_address'),
-                'image_url': row.__dict__.get('image_url'), 
-                'lat': row.__dict__.get('lat'), 
-                'category': row.__dict__.get('category'), 
-                'name': row.__dict__.get('name'), 
-                'postal_code':row.__dict__.get('postal_code'),
-                'extra_info':row.__dict__.get('extra_info'),
-                'tags':row.__dict__.get('tags'), 
-                'lon':row.__dict__.get('lon')} for row in res if row]
+    response = App.queryplaces(category)
     return {'result': response}
+
+@app.route('/api/v1/queryevents', methods=['POST', 'GET'])
+def queryevents_callback():
+    query = request.json
+    category =  query.get('category')
+    response = App.queryevents(category)    
+    return {'result': response}
+    
+
+    
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

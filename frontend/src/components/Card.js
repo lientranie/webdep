@@ -1,67 +1,41 @@
 import React, {useState, useEffect} from 'react';
 import './Card.css';
-import CardItem from './CardItem';
-import items from './data'
-import NewCard from './NewCard';
+import PlacesCard from './PlacesCard';
 import Category from './Category';
+import EventsCard from './EventsCard';
 
 
-const itemlist = ['All',  'Accomodation & Hotel','Architecture & Design','Banquet Venues','Bar & Nightlife','Culture center', 'Grocery',
- 'Libraries', 'Museum & Gallerties', 'Meeting places & Auditorium','Nature & Sport', 'Restaurant & Cafe','Sauna & Wellness',
-  'Sight & Attracttion','Shopping','Work & Study',  ]
+const placesItems = ["ACCOMMODATION", "Academy", "Activity", "AdventurePark", "Airport", "AliPay", "AlvarAalto", "AmusementPark", "Animals", "Antiquariat", "Antiques", "Apartment", "Arboretum", "Architecture", "Arena", "Art", "Asian", "Athletics", "Auditorium", "BANQUET VENUES", "BARS & NIGHTLIFE", "BabySupplies", "Badminton", "Bags", "Bakery", "Banquet", "BanquetIsland", "BanquetSeaside", "Bar", "Barber", "Basketball", "Beach", "BeautySalon", "Bed&Breakfast", "Beef", "Beer", "Biking", "Billiards", "Bistro", "BookStore", "BotanicalGarden", "Bowling", "Breakfast", "Brewery", "Brunch", "Cafe", "CafeSummer", "Camping", "Candy", "Canoeing", "Casino", "Chinese", "Church", "Circus", "Climbing", "Club", "Cocktail", "Coffee", "Concert", "ContemporaryArt", "Cosmetics", "Cottage", "Craft", "CultureCentre", "Curated", "Dance", "DepartmentStore", "Design", "Distillery", "DogPark", "Drapery", "EcoCompass", "EcoFriendly", "EcoShop", "Electronics", "EquipmentRental", "EscapeRoom", "Fair", "Family", "Fashion", "FastFood", "Filipino", "FineDining", "Finnish", "Fish", "FleaMarket", "Floorball", "Florist", "Food", "Football", "Free", "FreeCatering", "French", "Frisbeegolf", "Furniture", "FursLeather", "Gallery", "Garden", "Georgian", "GlobalBlue", "Golf", "Greek", "GreenKey", "Grocery", "GymFitness", "Gymnastics", "Hamburger", "Harbour", "HardwareStore", "HealthService", "Hiking", "History", "HorseRiding", "Hostel", "Hotel", "IceSkating", "IceSwimming", "Indian", "InteriorDesign", "International", "Island", "IslandRestaurant", "Italian", "JCB", "Japanese", "Jazz", "Jewellery", "Karaoke", "Karting", "Kebab", "KidsClothing", "Korean", "LEEDEcoCertification", "LGBT", "Laundry", "Library", "LiveMusic", "Lunch", "Luxury", "MEETING PLACES", "MUSEUMS & GALLERIES", "MainAttraction", "Mansion", "MarketHall", "MarketPlace", "Massage", "Metal", "Mexican", "Michelin", "MiddleEast", "MiniGolf", "MixedSauna", "ModernNordic", "Monument", "MovieTheatre", "Museum", "Music", "NATURE & SPORTS", "NationalPark", "Nature", "NeighbourhoodSport", "Nepalese", "Nightclub", "NordicSwan", "Opera", "Organic", "Outlet", "Park", "Photography", "Pizza", "Playground", "PopUp", "Pub", "RESTAURANTS & CAFES", "Railwaystation", "RecordStore", "RecreationalArea", "RecreationalCentre", "Restaurant", "RestaurantSummer", "Rock", "Running", "Russian", "SAUNA & WELLNESS", "SERVICES", "SHOPPING", "SIGHTS & ATTRACTIONS", "Sauna", "SaunaMeeting", "Science", "Sculpture", "Sea", "Seaside", "SecondHand", "Shoes", "ShoppingCentre", "SkateBoard", "SkiingCrosscountry", "SkiingDownhill", "SmartCasual", "Souvenirs", "Spa", "Spanish", "Speciality", "Sport", "SportCenter", "SportOutdoor", "StandUp", "StartUp", "StationaryShop", "StreetFood", "StreetStyle", "Sup", "Sushi", "Swimming", "SwimmingHall", "Tea", "Technical", "Tennis", "Thai", "Theatre", "TouristInformation", "ToyStore", "TraditionalFinnish", "TravelAgency", "Turkish", "Uutuus", "VENUES", "Vegan", "Vegetarian", "Vietnamese", "Viewpoint", "WORK & STUDY", "Waterpark", "WeChatPay", "Wellness", "Wine", "WorkSpace", "Yoga"]
+const eventsItems = ["Cultural and world heritage", "Guidance", "Health and wellbeing", "Influence and participation", " Library visit", " Literature", " Society", " Workshop", " remote participation", " \u2018Booktalk\u2019 book tips session", "Afro-American music", "Aikuiset", "Annantalo", "Associations", "Book clubs", "Caisa", "Children and families", "Christmas", "Christmas decorations", "Christmas music", "Christmas presents", "Christmas tradition", "Concerts and clubs", "Courses", "Culture and leisure", "Design ja k\u00e4sity\u00f6", "Elokuva ja media", "Elokuvat", "Englanti", "Englanti (TV)", "Entresse Library", "Espan lava", "Espoo", "Et\u00e4osallistuminen", "Et\u00e4tapahtumat", "Events", "Events and tips", "Exhibitions", "Games", "General", "Halloween", "Harrastuspassi (Helsinki)", "HelMet", "Helsinki", "Helsinki Cathedral", "Helsinki residents", "Housing and environment", "Immigrants", "Infon\u00e4yt\u00f6t (Helsinki)", "It\u00e4keskus Library", "Juttuja kirjastosta", "Kannelm\u00e4en kirjasto ", "Kanneltalo", "Kids", "Kirjallisuus ja sanataide", "Kuvataide", "Language Caf\u00e9s and discussion groups", "Lapset", "Lastentapahtumat", "Lauttasaari library", "Libraries", "Libraries and services", "Library Apple", "Library Oodi", "Literature", "Luennot ja keskustelut", "Malmitalo", "Maunula Library", "Midsummer", "Muotoilu", "Musiikki", "Muu", "Muut kulttuuritapahtumat (monitaide)", "Muut tapahtumat", "Normaali", "Nuorille", "Nuuksio National Park", "N\u00e4kyy TV-sovelluksessa", "N\u00e4yttelyt", "Ohjelmasivun p\u00e4\u00e4nosto", "Opastuskalenteri", "Other events", "Oulunkyl\u00e4 Library", "Palohein\u00e4n kirjasto ", "Palvelut", "Pasila Library", "Pit\u00e4j\u00e4nm\u00e4en kirjasto ", "Pointin kirjasto", "Pukinm\u00e4en kirjasto ", "Pupils", "Rikhardinkatu Library", "Ruotsi", "Ruotsi (TV)", "Saint Lucy's Day", "Sami culture", "Savoy-teatteri", "Sello Library", "Senior citizens", "Seniorit", "Sibelius Violin Competition", "Sirkus", "Stoa", "Stoan", "Story hours", "Students", "Suomenlinna sea fortress", "Suomenlinnan kirjasto ", "Suomi", "Suomi (TV)", "Suvilahti", "Tanssi", "Tapanilan kirjasto ", "Tapiola Library", "Teatteri", "Teatteri ja sirkus", "Teens", "Tikkurilan kirjasto ", "Training and courses", "Ty\u00f6pajat", "Vantaa", "Vuotalo", "Youth", "ability to write", "access to employment", "accordion", "adult education", "adults", "airplanes", "animal farms", "animated characters", "animated films", "animation", "anime", "anointment (religion)", "antiques", "archipelagoes", "architecture", "art", "art exhibitions", "art galleries", "art glass", "art history", "art museums", "art music", "associations", "aviation", "baking", "ball sports", "ballet (art forms)", "ballet music", "ballets (works)", "basketball", "beach volley", "beauty care sector", "beer", "beverages", "biennials (exhibitions)", "bingo", "blues (Afro-American music)", "board games", "boating", "bowling", "caf\u00e9s", "camp life", "camps", "canoe camping", "card games", "cemeteries", "ceramic art", "ceramics", "chamber operas", "children (age groups)", "children (family members)", "children's culture", "children's music", "children's poems", "children's theatres (theatre for children)", "cider (alcoholic beverages)", "cinema (art forms)", "cinematography", "circus (performing arts)", "clayware", "climate", "climate changes", "climbing", "clothing design", "clothing sector (lines of business)", "collections", "comedy (style)", "comedy films", "comic art", "comics", "complicity", "computer games", "computers", "concert activity", "concerts", "concrete art", "contemporary art", "contemporary circus", "contemporary dance", "contemporary music", "conversation", "counselling", "courses (societal objects)", "craft skills", "crocheting", "cross-country running", "cruises", "cultural events", "cultural history", "culture", "dance (performing arts)", "dance events", "democracy", "design (artistic creation)", "digital art", "direction (instruction and guidance)", "disc golf", "diversity", "dog shows", "drawing (artistic creation)", "ecological design", "education and training", "electronic popular music", "employment", "ensembles (groups)", "environment", "environmental protection", "events", "everyday", "exhibitions", "experimental music", "expression (communication)", "families", "families with children", "fantasy films", "fashion", "festivaali", "festivals", "figure skating", "film festivals", "film music", "films", "fine arts", "flea markets", "floorball", "folk music (traditional music)", "folk rock", "food", "food culture", "food preparation", "football", "forests", "furniture", "game consoles", "games", "gardening", "girl work", "glassblowing", "graffiti", "graphics (visual arts)", "growth companies", "guidance", "gymnastics", "gyms", "handcrafting", "handicrafts", "health", "heavy metal", "hiking and backpacking", "hip hop", "history", "holiday", "horror films", "horse sports", "ice dancing", "ice hockey", "ilmaistapahtumat", "image processing", "independence days", "indoor climbing", "influence", "installation art", "installations (works of art)", "instrumental surf", "international matches", "intrinsic motivation", "introduced species", "jazz", "jobseekers", "karaoke", "kulttuuri", "languages", "learning", "lectures", "leisure", "libraries", "library services", "light art", "light music", "light music orchestras", "literary art", "literary events", "literature", "literature circles", "live music", "magicians", "makeup", "mangas", "marathon running", "masquerades", "media art", "media literacy", "migrants", "modern art", "modernism", "monologues", "moottoriurheilu", "motor sports", "motorcycling", "motoring", "museums", "museums of cultural history", "music", "music clubs", "music playschools", "music theatres", "musicals", "musiikki", "muu", "mysticism", "nature", "nature conservation", "nature guides", "nature sites", "opera (arts)", "operas", "operettas", "organ music", "other languages", "outdoor games", "outdoor recreation", "outdoor recreation areas", "outdoor sports", "painting (visual arts)", "participation", "pastries", "peace work", "pedal cars", "pensioners", "performance  (art forms)", "performance skills", "performing arts", "perinnetapahtuma", "photographic art", "photographs", "photography", "photography exhibitions", "physical training", "physical well-being", "planning and design", "playgrounds", "playing (children's games)", "playing (games and sports)", "plays", "poems", "poetry slam", "political decision making", "popular music", "posters", "prehistory", "progressive rock music", "punk rock", "pupils", "puppet theatre", "rainbows", "reading", "recitation", "recreation areas", "regional identity of Helsinki residents", "relaxation", "remote participation", "residence", "resident activities", "residents", "revamping", "rhythm and blues music", "rock music", "rockabilly music", "rugosa rose", "rune singing", "running", "sailing", "sailing ships", "salsa (dances)", "scale models", "science", "science fiction films", "sculpture (visual arts)", "sculptures (works of art)", "self-expression", "seminars", "senior citizens", "services for older people", "sewing", "shadow theatre", "short films", "show jumping", "singer-songwriters", "skiing", "soap", "soul music", "sound art", "sports", "sports contests", "sports events", "stand-up comedy", "startup companies", "story hours", "streaming", "street art", "street dance", "students", "summer", "summer camps", "summer theatres", "sustainable development", "swimming", "symphony orchestras", "talkoot", "tapahtuma", "terraces (patios)", "textile and clothing industry", "theatre", "theatre events", "theatrical makeup", "tourism", "tourists and travellers", "town and city councils", "trade fairs", "tradition", "traffic", "trips", "urban culture", "urban history", "urban policy", "vegetarian dishes", "video art", "virtuality", "vocal music", "volleyball", "volunteer work", "voyages and travels", "walking (motion)", "walking tours", "water sports", "well-being", "wheel throwing", "wines", "workshops", "world music", "yoga", "young people", "youth clubs", "youth recreational facilities", "youth services", "youth work"]
 
 
-const allCategories = ['All', ...new Set(items.map((item) => item.category))];
 
 function Cards() {
-  const [clickedItem, setClickedItem] = useState('') 
-
+  const [clickedItem, setClickedItem] = useState('Academy') 
+  const [clickedEvent, setClickedEvent] = useState('Guidance') 
+  console.log(clickedItem)
   return (
     <div className='cards'>
-      <h1>Check out these EPIC Destinations!</h1>   
-      <Category items = {itemlist} clickedItem ={clickedItem} setClickedItem={setClickedItem} />   
+      <h1>Check out these EPIC Destinations!</h1>  
+      <div>
+        <div className='ui fluid container' style={{"height":"150px", "overflow-y": "scroll", "overflow-x": "hidden"}}>      
+          <Category items = {placesItems} clickedItem ={clickedItem} setClickedItem={setClickedItem} />   
+        </div>      
       <br/>
-      <NewCard  clickedItem = {clickedItem} />   
-      <br/>
-      
-      <div className='cards__container'>
-        <div className='cards__wrapper'>
-          <ul className='cards__items'>
-            <CardItem
-              src='https://www.helmet.fi/download/noname/{C2DADB6A-5CCA-4317-9D8A-010C82617627}/83239'
-              text='Lauantain satutuokioissa kuunnellaan satuja. Lisäksi jokaisella kerralla on pientä satuihin liittyvää oheistoimintaa - tehdään esimerkiksi sadulle äänimaisema, askarrellaan tai tutustutaan beebot -robotteihin.'
-              label='Children and families'
-              path='/events'
-            />
-            <CardItem
-              src='https://www.helmet.fi/download/noname/{C5BC0B85-BDAA-48B5-A6DF-EC333CF880D2}/48598'
-              text='Travel through the Islands of Bali in a Private Cruise'
-              label='Luxury'
-              path='/sights'
-            />            
-          </ul>
-          <ul className='cards__items'>
-            <CardItem
-              src='https://www.helmet.fi/download/noname/{C95C4392-6C2F-4182-9182-1D9A0A376117}/87364'
-              text='Set Sail in the Atlantic Ocean visiting Uncharted Waters'
-              label='Mystery'
-              path='/events'
-            />
-            <CardItem
-              src='http://www.caisa.fi/instancedata/prime_product_resurssivaraus/kulke/embeds/EventPic_693092.jpg'
-              text='Experience Football on Top of the Himilayan Mountains'
-              label='Adventure'
-              path='/events'
-            />
-            <CardItem
-              src='https://api.hel.fi/linkedevents/media/images/Meilahti_c_Veikko_Somerpuro_.jpg'
-              text='Ride through the Sahara Desert on a guided camel tour'
-              label='Adrenaline'
-              path='/sign-up'
-            />
-          </ul>
+        <div>
+          <PlacesCard  clickedItem = {clickedItem} />  
         </div>
       </div>
+     
+      <h1>Check out the events happening now in Helsinki!</h1> 
+      <br/>
+      <div className='ui fluid container' style={{"height":"150px", "overflow-y": "scroll", "overflow-x": "hidden"}}>      
+        <Category items = {eventsItems} clickedItem ={clickedEvent} setClickedItem={setClickedEvent} />   
+      </div>      
+      <br/>
+      <EventsCard clickedEvent = {clickedEvent} />   
+      <br/>
+        
     </div>
   );
 }
