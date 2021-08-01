@@ -35,13 +35,13 @@ class PlacesCard extends React.Component{
 
     render() {
         return (
-        <div className="ui four column grid" style={{"height":"700px", "overflow-y": "scroll", "overflow-x": "hidden", 'margin-left':'auto','margin-right':'auto'}} > 
+        <div className="ui column grid" style={{"height":"800px", "overflow-y": "scroll", "overflow-x": "hidden"}} > 
                     {this.state.items.map((menuItem) => {
                         const { name, street_address, postal_code, locality,tags ,description_intro, description_body,image_url, openStatus,openTime} = menuItem;
                         return (
                         <ul>
                             <div className = "ui link cards">
-                                <div className="card" style={{"width":"400px", "height":"400px","overflow-y": "scroll", "overflow-x": "hidden"}}> 
+                                <div className="card" style={{"width":"300px", "height":"400px","overflow-y": "scroll", "overflow-x": "hidden"}}> 
                                     <div class="image">
                                         <img src={image_url}/>
                                     </div>                           
